@@ -20,17 +20,11 @@ import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.YahooApi;
-import org.scribe.model.OAuthConfig;
-import org.scribe.model.OAuthRequest;
-import org.scribe.model.SignatureType;
 import org.scribe.model.Token;
-import org.scribe.model.Verb;
-import org.scribe.oauth.OAuth10aServiceImpl;
+import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
 import android.app.Activity;
-import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.StrictMode;
@@ -91,11 +85,11 @@ public class MainActivity extends Activity implements OnClickListener {
 		if (id == loginButton.getId()) {
 			
 			/* Login */
-			testRequestToken();
+			testOAuth();
 		}
 	}
 	
-	public void testRequestToken() {
+	public void testOAuth() {
 		
 		new Thread(new Runnable() {
 			
@@ -112,11 +106,21 @@ public class MainActivity extends Activity implements OnClickListener {
 				.callback("oob")
 				.build();
 				
-				/* Fails Here */
-				/* {"error_code":"500","error_message":"Specified OAuth consumer does not exist."} */
-				Token requestToken = service.getRequestToken();
+				Scanner in = new Scanner(System.in);
 				
+				Token requestToken = service.getRequestToken();
 				Log.i("Okan", "Request Token : " + requestToken.toString());
+				
+				String authUrl = service.getAuthorizationUrl(requestToken);
+				Log.i("Okan", "OAuth URL : " + authUrl);
+				
+				/* Fails here, NoSuchElementException */
+				String verifierString = in.nextLine();
+				Log.i("Okan", "Verifier : " + verifierString);
+				
+				Verifier verifier = new Verifier(verifierString);
+				Token accessToken = service.getAccessToken(requestToken, verifier);
+				Log.i("Okan", "Access Token : " + accessToken.toString());
 				
 				Looper.loop();
 				
@@ -206,5 +210,4 @@ public class MainActivity extends Activity implements OnClickListener {
 			}
 		}).start();
 	}
-	 
 }
