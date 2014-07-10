@@ -5,23 +5,25 @@ import org.scribe.model.Token;
 
 public class BreezyApi extends DefaultApi10a {
 	
-	private static final String AUTHORIZE_URL = "http://breezy-api-test.azurewebsites.net/oauth/authorize";
-	private static final String REQUEST_TOKEN_RESOURCE = "breezy-api-test.azurewebsites.net/oauth/request_token";
-	private static final String ACCESS_TOKEN_RESOURCE = "breezy-api-test.azurewebsites.net/oauth/access_token";
+	private static final String AUTHORIZE_URL = "oauth/authorize";
+	private static final String REQUEST_TOKEN_RESOURCE = "oauth/request_token";
+	private static final String ACCESS_TOKEN_RESOURCE = "oauth/access_token";
+	
+	private static final String API_URL = "http://breezy-api-test.azurewebsites.net/";
 	
 	@Override
 	public String getAccessTokenEndpoint() {
-		return "http://" + ACCESS_TOKEN_RESOURCE;
+		return API_URL + ACCESS_TOKEN_RESOURCE;
 	}
 	
 	@Override
 	public String getRequestTokenEndpoint() {
-		return "http://" + REQUEST_TOKEN_RESOURCE;
+		return API_URL + REQUEST_TOKEN_RESOURCE;
 	}
 	
 	@Override
 	public String getAuthorizationUrl(Token requestToken) {
-		return String.format(AUTHORIZE_URL, requestToken.getToken());
+		return String.format(API_URL + AUTHORIZE_URL, requestToken.getToken());
 	}
 	
 	/**
