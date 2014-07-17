@@ -9,7 +9,10 @@ public class BreezyApi extends DefaultApi10a {
 	private static final String REQUEST_TOKEN_RESOURCE = "oauth/request_token";
 	private static final String ACCESS_TOKEN_RESOURCE = "oauth/access_token";
 	
-	private static final String API_URL = "http://breezy-api-test.azurewebsites.net/";
+	public static final String API_URL = "http://breezy-api-test.azurewebsites.net/";
+	
+	public static final String ACCESS_TOKEN_STRING = "ACCESS_TOKEN";
+	public static final String ACCESS_TOKEN_SECRET_STRING = "ACCESS_TOKEN_SECRET";
 	
 	@Override
 	public String getAccessTokenEndpoint() {
@@ -31,7 +34,7 @@ public class BreezyApi extends DefaultApi10a {
 	 */
 	public static class Authenticate extends BreezyApi {
 		
-		private static final String AUTHENTICATE_URL = "http://breezy-api-test.azurewebsites.net/oauth/authorize?oauth_token=";
+		private static final String AUTHENTICATE_URL = API_URL + "oauth/authorize?oauth_token=";
 		
 		@Override
 		public String getAuthorizationUrl(Token requestToken) {
