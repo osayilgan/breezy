@@ -26,6 +26,7 @@ import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -122,13 +123,13 @@ public class MainActivity extends Activity implements OnClickListener {
 				
 				/* Step 3 */
 				/* Get Access token with Request Token and Verification Code */
-				/* Save Access Token */
 				
-				/** FAILS HERE, oauth_verifier is not correct **/
-				/* Check the Response message in Log Cat */
 				Verifier verifier = new Verifier(verifierValue);
 				Token accessToken = service.getAccessToken(requestToken, verifier);
 				Log.i("Okan", "Access Token : " + accessToken.toString());
+				
+				/* Save Access Token */
+				saveAccessToken(accessToken);
 				
 				Looper.loop();
 			}
@@ -144,7 +145,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	public String getOAuthVerifier(String requestToken) {
 		
 		/* URL with Request Token */
-		String url = "http://breezy-api-test.azurewebsites.net/oauth/authorize?oauth_token=" + requestToken;
+		String url = BreezyApi.API_URL + "/oauth/authorize?oauth_token=" + requestToken;
 		String oauthVerifier = "";
 		
 		/* Create JSON Object with User Credentials */
@@ -157,7 +158,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 		
 		/* HTTP Client and it's parameters */
-		int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
+		int TIMEOUT_MILLISEC = 20000;  // = 20 seconds
 		HttpParams httpParams = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(httpParams, TIMEOUT_MILLISEC);
 		HttpConnectionParams.setSoTimeout(httpParams, TIMEOUT_MILLISEC);
@@ -200,7 +201,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				String line = null;
 				
 				while ((line = inputStream.readLine()) != null) {
-					stringBuilder.append(line + "\n");
+					stringBuilder.append(line);
 				}
 				
 				/* LOG full Response */
@@ -219,6 +220,27 @@ public class MainActivity extends Activity implements OnClickListener {
         }
         
         return oauthVerifier;
+	}
+	
+	/**
+	 * Parses Access Token and it's Secret.
+	 * Saves them to the Shared Preferences.
+	 * 
+	 * @param accessToken	Access Token Received from 3rd step in OAuth.
+	 */
+	private void saveAccessToken(Token accessToken) {
+		
+		String token = accessToken.getToken();
+		String tokenSecret = accessToken.getSecret();
+		
+		SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, 0);
+		SharedPreferences.Editor editor = settings.edit();
+		
+	    editor.putString(BreezyApi.ACCESS_TOKEN_STRING, token);
+	    editor.putString(BreezyApi.ACCESS_TOKEN_SECRET_STRING, tokenSecret);
+	    
+		// Commit the edits!
+		editor.commit();
 	}
 	
 	/**
