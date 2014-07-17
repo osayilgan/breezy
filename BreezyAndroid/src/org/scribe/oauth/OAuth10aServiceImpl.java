@@ -51,7 +51,7 @@ public class OAuth10aServiceImpl implements OAuthService
 
   public Token getRequestToken()
   {
-    return getRequestToken(2, TimeUnit.SECONDS);
+    return getRequestToken(5, TimeUnit.SECONDS);
   }
 
   public Token getRequestToken(RequestTuner tuner)
@@ -63,11 +63,11 @@ public class OAuth10aServiceImpl implements OAuthService
     request.addOAuthParameter(OAuthConstants.CALLBACK, config.getCallback());
     addOAuthParams(request, OAuthConstants.EMPTY_TOKEN);
     appendSignature(request);
-
+    
     config.log("sending request...");
     Response response = request.send(tuner);
     String body = response.getBody();
-
+    
     config.log("response status code: " + response.getCode());
     config.log("response body: " + body);
     return api.getRequestTokenExtractor().extract(body);
@@ -100,14 +100,14 @@ public class OAuth10aServiceImpl implements OAuthService
   {
     return getAccessToken(requestToken, verifier, 2, TimeUnit.SECONDS);
   }
-
+  
   public Token getAccessToken(Token requestToken, Verifier verifier, RequestTuner tuner)
   {
     config.log("obtaining access token from " + api.getAccessTokenEndpoint());
     OAuthRequest request = new OAuthRequest(api.getAccessTokenVerb(), api.getAccessTokenEndpoint());
     request.addOAuthParameter(OAuthConstants.TOKEN, requestToken.getToken());
     request.addOAuthParameter(OAuthConstants.VERIFIER, verifier.getValue());
-
+    
     config.log("setting token to: " + requestToken + " and verifier to: " + verifier);
     addOAuthParams(request, requestToken);
     appendSignature(request);
