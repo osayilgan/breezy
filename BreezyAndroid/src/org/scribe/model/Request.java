@@ -20,7 +20,8 @@ public class Request
   private static RequestTuner NOOP = new RequestTuner() {
     @Override public void tune(Request _){}
   };
-  public static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded";
+//  public static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded";
+  public static final String DEFAULT_CONTENT_TYPE = "application/json";
 
   private String url;
   private Verb verb;
@@ -126,7 +127,7 @@ public class Request
   void addBody(HttpURLConnection conn, byte[] content) throws IOException
   {
     conn.setRequestProperty(CONTENT_LENGTH, String.valueOf(content.length));
-
+    
     // Set default content type if none is set.
     if (conn.getRequestProperty(CONTENT_TYPE) == null)
     {
