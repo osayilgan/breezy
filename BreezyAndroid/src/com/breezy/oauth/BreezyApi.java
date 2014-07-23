@@ -10,6 +10,7 @@ public class BreezyApi extends DefaultApi10a {
 	private static final String ACCESS_TOKEN_RESOURCE = "oauth/access_token";
 	
 	public static final String API_URL = "http://breezy-api-test.azurewebsites.net/";
+//	public static final String API_URL = "http://office.breezy.com:9312/";
 	
 	public static final String ACCESS_TOKEN_STRING = "ACCESS_TOKEN";
 	public static final String ACCESS_TOKEN_SECRET_STRING = "ACCESS_TOKEN_SECRET";

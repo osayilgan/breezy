@@ -28,18 +28,27 @@ import org.scribe.oauth.OAuthService;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnClickListener {
 	
 	/** UI Elements */
 	private EditText userName, password;
-	private Button loginButton;
+	private Button loginRegisterButton;
+	private Button toggleLoginRegisterButton;
+	
+	private ProgressBar progressBar;
+	private RelativeLayout mainViewHolder;
 	
 	/** API Class holds URL and API Parameters */
 	final BreezyApi api = new BreezyApi();
@@ -60,7 +69,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	 * Set Login Button's Click Action.
 	 */
 	public void setClickListeners() {
-		loginButton.setOnClickListener(this);
+		loginRegisterButton.setOnClickListener(this);
 	}
 	
 	/**
@@ -70,11 +79,33 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 		userName = (EditText) findViewById(R.id.userName);
 		password = (EditText) findViewById(R.id.password);
-		loginButton = (Button) findViewById(R.id.loginButton);
+		loginRegisterButton = (Button) findViewById(R.id.loginRegisterButtonSendRequest);
+		toggleLoginRegisterButton = (Button) findViewById(R.id.loginRegisterToggleButton);
+		
+		progressBar = (ProgressBar) findViewById(R.id.loginProgressBar);
+		mainViewHolder = (RelativeLayout) findViewById(R.id.mainViewHolder);
 		
 		/* Set Constant Texts here */
 		userName.setText(Constants.USER_EMAIL);
 		password.setText(Constants.PASSWORD);
+	}
+	
+	private void fadeOut(View view) {
+		
+		AlphaAnimation anim = new AlphaAnimation(1.0f, 0.0f);
+		anim.setDuration(1000);
+		anim.setRepeatCount(0);
+		anim.setFillAfter(true);
+		view.startAnimation(anim);
+	}
+	
+	private void fadeIn(View view) {
+		
+		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
+		anim.setDuration(1000);
+		anim.setRepeatCount(0);
+		anim.setFillAfter(true);
+		view.startAnimation(anim);
 	}
 	
 	@Override
@@ -83,14 +114,41 @@ public class MainActivity extends Activity implements OnClickListener {
 		int id = v.getId();
 		
 		/* Login Button is Clicked */
-		if (id == loginButton.getId()) {
+		if (id == loginRegisterButton.getId()) {
+			
+			// TODO
+			// check if the action is Login or Register.
 			
 			/* Login */
-			testOAuth();
+			authoriseUser();
+			
+		} else if(id == toggleLoginRegisterButton.getId()) {
+			
+			// TODO
+			// Change the Texts of the Buttons, from Login to Register and from register to Login.
+			// Use a boolean variable to indicate the Button click either it will register or login.
+			
 		}
 	}
 	
-	public void testOAuth() {
+	/**
+	 * Uses OAuth 1.0 to get Access Token within 3 steps.
+	 * 
+	 * Retrieve;
+	 * 1- Request Token
+	 * 2- Verifier
+	 * 3- Access Token.
+	 */
+	public void authoriseUser() {
+		
+		/* Show Progress Bar */
+		progressBar.setVisibility(View.VISIBLE);
+		fadeIn(progressBar);
+		
+		fadeOut(mainViewHolder);
+		mainViewHolder.setVisibility(View.GONE);
+		
+		final Handler handler = new Handler();
 		
 		new Thread(new Runnable() {
 			
@@ -100,7 +158,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				Looper.prepare();
 				
 				/* Trying to get the Request Token First */
-				OAuthService service = new ServiceBuilder()
+				final OAuthService service = new ServiceBuilder()
 				.provider(api)
 				.apiKey(Constants.CLIENT_KEY)
 				.apiSecret(Constants.CLIENT_SECRET)
@@ -109,7 +167,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				
 				/* Step 1 */
 				/* Get Request Token */
-				Token requestToken = service.getRequestToken();
+				final Token requestToken = service.getRequestToken();
 				Log.i("Okan", "(1)Request Token : " + requestToken.getToken());
 				Log.i("Okan", "(2)Request Token Secret : " + requestToken.getSecret());
 				
@@ -118,18 +176,53 @@ public class MainActivity extends Activity implements OnClickListener {
 				
 				/* Step 2 */
 				/* Get Verification Code, make custom call to API with request token and user credentials */
-				String verifierValue = getOAuthVerifier(requestToken.getToken());
+				final String verifierValue = getOAuthVerifier(requestToken.getToken());
 				Log.i("Okan", "Verifier String : " + verifierValue);
 				
-				/* Step 3 */
-				/* Get Access token with Request Token and Verification Code */
-				
-				Verifier verifier = new Verifier(verifierValue);
-				Token accessToken = service.getAccessToken(requestToken, verifier);
-				Log.i("Okan", "Access Token : " + accessToken.toString());
-				
-				/* Save Access Token */
-				saveAccessToken(accessToken);
+				if (verifierValue.equalsIgnoreCase("")) {
+					
+					/* Error, No Verifier Granted */
+					
+					handler.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							
+							/* Show Progress Bar */
+							progressBar.setVisibility(View.GONE);
+							mainViewHolder.setVisibility(View.VISIBLE);
+							
+							fadeIn(mainViewHolder);
+							fadeOut(progressBar);
+							
+							Toast.makeText(MainActivity.this, "Verifier Couldn't Granted", Toast.LENGTH_SHORT).show();
+						}
+					});
+					
+				} else {
+					
+					/* Success, Verifier Granted */
+					
+					/* Step 3 */
+					/* Get Access token with Request Token and Verification Code */
+					
+					Verifier verifier = new Verifier(verifierValue);
+					Token accessToken = service.getAccessToken(requestToken, verifier);
+					Log.i("Okan", "Access Token : " + accessToken.toString());
+					
+					/* Save Access Token */
+					saveAccessToken(accessToken);
+					
+					handler.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							
+							/* Go To Document Activity */
+							DocumentActivity.startDocumentActivity(MainActivity.this);
+						}
+					});
+				}
 				
 				Looper.loop();
 			}
