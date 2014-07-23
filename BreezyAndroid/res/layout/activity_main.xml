@@ -7,8 +7,13 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
-	
+    
     <RelativeLayout 
+        android:id="@+id/mainViewHolder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+        
+        <RelativeLayout 
         android:id="@+id/userNameholder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -57,7 +62,7 @@
     </RelativeLayout>
     
     <Button 
-        android:id="@+id/loginButton"
+        android:id="@+id/loginRegisterButtonSendRequest"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -67,11 +72,25 @@
         android:textAlignment="center"
         android:visibility="visible" />
     
+    <Button 
+        android:id="@+id/loginRegisterToggleButton"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:text="Register"
+        android:textAlignment="center"
+        android:visibility="visible" />
+        
+    </RelativeLayout>
+    
     <ProgressBar 
         android:id="@+id/loginProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
         android:layout_below="@+id/passwordHolder"
         android:indeterminate="true"
         android:visibility="gone" />
